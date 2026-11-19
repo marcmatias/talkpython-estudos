@@ -1,23 +1,21 @@
-from actors import Wizard, Creature
+from actors import Wizard, Creature, SmallAnimal, Dragon
 import random
 import time
 
 def print_header():
-    print()
-    print('--------------------')
+    print('\n--------------------')
     print('     WIZARD BATTLE')
-    print('--------------------')
-    print()
+    print('--------------------\n')
 
 
 def game_loop():
 
     creatures = [
-        Creature('Toad', 1),
+        SmallAnimal('Toad', 1),
         Creature('Tiger', 12),
-        Creature('Bat', 3),
-        Creature('Dragon', 50),
-        Creature('Evil Wizard', 100),
+        SmallAnimal('Bat', 3),
+        Dragon('Dragon', 50, 20, True),
+        Wizard('Evil Wizard', 100),
     ]
 
     hero = Wizard('Gandalf', 75)
@@ -26,14 +24,23 @@ def game_loop():
         active_creature = random.choice(creatures)
         print(f'A {active_creature.name} of level {active_creature.level} has appear from a dark and foggy forest...')
 
-        cmd = input('Do you [a]ttack, [r]unaway, or [l]ook around? ')
+        try:
+            cmd = input('Do you [a]ttack, [r]unaway, or [l]ook around? ')
+        except KeyboardInterrupt:
+            exiting_game_msg()
+            break
+
         if cmd == 'a':
             if hero.attack(active_creature):
                 creatures.remove(active_creature)
             else:
-                print('The wizard runs and hides taking time to recover...')
-                time.sleep(5)
-                print('The wizard returns revitalized!')
+                try:
+                    print('The wizard runs and hides taking time to recover... We need to wait...')
+                    time.sleep(5)
+                    print('The wizard returns revitalized!')
+                except KeyboardInterrupt:
+                    exiting_game_msg()
+                    break
         elif cmd ==  'r':
             print('runaway')
         elif cmd == 'l':
@@ -41,15 +48,17 @@ def game_loop():
             for c in creatures:
                 print(f' * A {c.name} level {c.level}')
         else:
-            print('OK, exiting game... bye!')
+            exiting_game_msg()
             break
 
         if not creatures:
-            print()
-            print('''You've defeated all the creatures , well done!''')
-            print()
+            print('''\nYou've defeated all the creatures , well done!''')
             print('Bye!')
             break
+
+
+def exiting_game_msg():
+    print('OK, exiting game... bye!')
 
 
 def main():
