@@ -27,23 +27,18 @@ def get_search_text_from_user() -> str:
     return text
 
 
-def search_folders(folder: str, text: str) -> List[str]:
-    all_matches: List[str] = []
+def search_folders(folder: str, text: str) -> List[SearchResult]:
     items: List[str] = os.listdir(folder)
 
     for item in items:
         full_item = os.path.join(folder, item)
-        if os.path.isdir(item):
-            continue
-
-        matches = search_file(full_item, text)
-        all_matches.extend(matches)
-
-    return all_matches
+        if os.path.isdir(full_item):
+            yield from search_folders(full_item, text)
+        else:
+            yield from search_file(full_item, text)
 
 
 def search_file(filename: str, search_text: str):
-    matches: List[str] = []
     with open(filename, 'r', encoding='utf-8') as fin:
 
         line_number = 0
@@ -51,9 +46,7 @@ def search_file(filename: str, search_text: str):
             line_number += 1
             if line.lower().find(search_text) >= 0:
                 m = SearchResult(line=line_number, file=filename, text=line)
-                matches.append(m)
-
-        return matches
+                yield m
 
 
 def main() -> None:
@@ -74,7 +67,6 @@ def main() -> None:
         print(f'file: {m.file}')
         print(f'line: {m.line}')
         print(f'match: {m.text.rstrip()}\n')
-
 
 
 if __name__ == '__main__':
